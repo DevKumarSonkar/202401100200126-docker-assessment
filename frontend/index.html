@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FestPass Registration</title>
+</head>
+<body>
+  <h1>FestPass Event Registration</h1>
+
+  <form id="form">
+    <input id="name" placeholder="Your name" required>
+    <input id="event" placeholder="Event name" required>
+    <button type="submit">Register</button>
+  </form>
+
+  <p id="message"></p>
+  <h2>Registrations</h2>
+  <ul id="registrations"></ul>
+
+  <script>
+    async function loadRegistrations() {
+      const response = await fetch('/api/registrations');
+      const data = await response.json();
+      document.getElementById('registrations').replaceChildren();
+
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name} - ${item.event}`;
+        document.getElementById('registrations').appendChild(li);
+      });
+    }
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          event: document.getElementById('event').value
+        })
+      });
+
+      document.getElementById('message').textContent =
+        response.ok ? 'Registration successful!' : 'Registration failed';
+
+      if (response.ok) {
+        document.getElementById('form').reset();
+        await loadRegistrations();
+      }
+    });
+
+    loadRegistrations();
+  </script>
+</body>
+</html>
